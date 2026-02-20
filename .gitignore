@@ -1,0 +1,21 @@
+# Secrets
+config/secrets.json
+
+# Database
+kanban.db
+
+# Node modules
+backend/node_modules/
+dashboard/node_modules/
+
+# Logs
+*.log
+npm-debug.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ana Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="brand">
+      <div class="logo">✦</div>
+      <div class="app-name">Ana Hub</div>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#" data-page="dashboard" class="active">Dashboard</a></li>
+      <li><a href="#" data-page="chat">Chat</a></li>
+      <li><a href="#" data-page="skills">Skills</a></li>
+      <li><a href="#" data-page="documents">Documents</a></li>
+      <li><a href="#" data-page="kanban-wealth">Wealth Board</a></li>
+      <li><a href="#" data-page="kanban-bav">BAV Board</a></li>
+      <li><a href="#" data-page="kanban-cancer">Cancer Board</a></li>
+      <li><a href="#" data-page="settings">Settings</a></li>
+    </ul>
+    <div class="status-indicator" id="syncStatus">Syncing…</div>
+  </nav>
+
+  <main class="content">
+    <!-- Dashboard Page -->
+    <section id="page-dashboard" class="page active">
+      <h1>Dashboard</h1>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">System Health</div>
+          <div class="stat-value" id="healthStatus">Checking…</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Last Sync</div>
+          <div class="stat-value" id="lastSync">–</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Token Usage (today)</div>
+          <div class="stat-value" id="tokenUsage">–</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active Apps</div>
+          <div class="stat-value">4</div>
+        </div>
+      </div>
+      <h2>Sync Status</h2>
+      <div id="syncLog">Loading…</div>
+    </section>
+
+    <!-- Chat Page -->
+    <section id="page-chat" class="page">
+      <h1>Chat Sessions</h1>
+      <div class="model-selector">
+        <label>Model: <select id="chatModel"></select></label>
+      </div>
+      <div id="chatSessions">Loading sessions…</div>
+      <div id="chatInterface" class="chat-window hidden">
+        <div class="messages" id="messages"></div>
+        <div class="input-area">
+          <textarea id="messageInput" placeholder="Type a message…"></textarea>
+          <button id="sendBtn">Send</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Skills Page -->
+    <section id="page-skills" class="page">
+      <h1>Skills</h1>
+      <p>Manage AI skills and automations.</p>
+      <div class="skills-list">Skill browser placeholder.</div>
+    </section>
+
+    <!-- Documents Page -->
+    <section id="page-documents" class="page">
+      <h1>Documents</h1>
+      <div class="folder-tree">Folder tree placeholder.</div>
+      <div class="doc-preview">Document preview placeholder.</div>
+    </section>
+
+    <!-- Kanban Pages -->
+    <section id="page-kanban-wealth" class="page">
+      <h1>Wealth Analytica Board</h1>
+      <div class="kanban-board" id="board-wealth"></div>
+    </section>
+    <section id="page-kanban-bav" class="page">
+      <h1>BAV Futures Board</h1>
+      <div class="kanban-board" id="board-bav"></div>
+    </section>
+    <section id="page-kanban-cancer" class="page">
+      <h1>Prostate Cancer Board</h1>
+      <div class="kanban-board" id="board-cancer"></div>
+    </section>
+
+    <!-- Settings Page -->
+    <section id="page-settings" class="page">
+      <h1>Settings</h1>
+      <div class="settings-section">
+        <h2>Models</h2>
+        <div class="setting-row">
+          <label>Default model:</label>
+          <select id="defaultModel"></select>
+        </div>
+        <div class="setting-row">
+          <label>Fallback chain:</label>
+          <div id="fallbackChainList"></div>
+        </div>
+        <button id="saveModels">Save</button>
+      </div>
+      <div class="settings-section">
+        <h2>Sync</h2>
+        <div class="setting-row">
+          <label>GitHub repository:</label>
+          <input type="text" id="syncRepo" placeholder="owner/repo">
+        </div>
+        <div class="setting-row">
+          <label>Poll interval (minutes):</label>
+          <input type="number" id="pollInterval" value="5" min="1">
+        </div>
+        <button id="saveSync">Save</button>
+      </div>
+      <div class="settings-section">
+        <h2>Backup & Restore</h2>
+        <button id="backupNow">Create Backup Now</button>
+        <button id="restoreLatest">Restore Latest</button>
+        <p class="note">Rollback available via Git history in deployment repo.</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
