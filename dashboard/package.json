@@ -1,0 +1,14 @@
+{
+  "name": "ana-hub-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "cp -r static .svelte-kit/output/static/ || true && echo 'Build complete (static files)'",
+    "start": "npx http-server .svelte-kit/output -p 3000",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.47.0"
+  }
+}

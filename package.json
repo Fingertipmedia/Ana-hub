@@ -1,0 +1,11 @@
+{
+  "name": "ana-hub",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "install:all": "cd backend && npm ci && cd ../dashboard && npm ci",
+    "start": "cd backend && npm start",
+    "test": "cd dashboard && npm test",
+    "test:ui": "cd dashboard && npm run test:ui"
+  }
+}
