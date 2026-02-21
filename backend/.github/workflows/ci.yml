@@ -1,0 +1,43 @@
+name: CI
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js 20
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+    - name: Install dependencies
+      run: npm ci
+    - name: Install Playwright browsers and dependencies
+      run: npx playwright install --with-deps
+    - name: Start backend server
+      run: |
+        mkdir -p config
+        echo '{"dashboard":{"port":3000,"bind":"127.0.0.1"}}' > config/secrets.json
+        if [ ! -f kanban.db ]; then
+          sqlite3 kanban.db < <(cat <<'SQL'
+CREATE TABLE boards (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, slug TEXT NOT NULL UNIQUE, description TEXT DEFAULT '');
+CREATE TABLE cards (id INTEGER PRIMARY KEY AUTOINCREMENT, board_id INTEGER NOT NULL, title TEXT NOT NULL, description TEXT DEFAULT '', "column" TEXT DEFAULT 'todo', agent TEXT, tokens INTEGER DEFAULT 0, start_at TEXT, end_at TEXT, tags TEXT DEFAULT '', created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now')), FOREIGN KEY (board_id) REFERENCES boards(id) ON DELETE CASCADE);
+CREATE TABLE comments (id INTEGER PRIMARY KEY AUTOINCREMENT, card_id INTEGER NOT NULL, author TEXT NOT NULL, content TEXT NOT NULL, source TEXT DEFAULT 'web', created_at TEXT DEFAULT (datetime('now')), FOREIGN KEY (card_id) REFERENCES cards(id) ON DELETE CASCADE);
+CREATE TABLE board_shares (id INTEGER PRIMARY KEY AUTOINCREMENT, board_id INTEGER NOT NULL, token TEXT NOT NULL UNIQUE, FOREIGN KEY (board_id) REFERENCES boards(id) ON DELETE CASCADE);
+INSERT INTO boards (name, slug, description) VALUES ('Wealth Analytica','wealth-analytica','Board for Wealth Analytica company'), ('BAV Futures','bav-futures','Board for BAV Futures'), ('Prostate Cancer','prostate-cancer','Board for Prostate Cancer UK');
+SQL
+          )
+        fi
+        node server.js &
+        npx wait-on http://127.0.0.1:3000/api/health --timeout=30s
+    - name: Run Playwright tests
+      run: npx playwright test
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-report
+        path: playwright-report/
