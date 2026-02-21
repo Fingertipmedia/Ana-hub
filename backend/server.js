@@ -3,7 +3,6 @@
  * Ana Hub Backend – Express server
  * Simple, self-hosted dashboard backend.
  */
-
 import express from 'express';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
@@ -29,9 +28,9 @@ function loadJSON(file, fallback = {}) {
     return fallback;
   }
 }
-
 const MODELS = loadJSON('models.json');
 const SYNC = loadJSON('sync.json', { pollInterval: 60, repo: '' });
+
 const SECRETS_PATH = path.join(configDir, 'secrets.json');
 let SECRETS = {};
 try {
@@ -59,6 +58,7 @@ if (existingBoards.c === 0) {
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
+
 // Serve dashboard static files
 app.use('/static', express.static(path.resolve(__dirname, '../dashboard/static')));
 app.get('/', (req, res) => res.sendFile(path.resolve(__dirname, '../dashboard/index.html')));
@@ -98,7 +98,6 @@ app.get('/api/tokens', (req, res) => {
 app.get('/api/settings/models', (req, res) => {
   res.json(MODELS);
 });
-
 app.post('/api/settings/models', (req, res) => {
   const { default: def, fallbackChain } = req.body;
   if (def) MODELS.default = def;
@@ -128,9 +127,9 @@ app.post('/api/kanban/board/:slug/cards', (req, res) => {
     INSERT INTO cards (board_id, title, description, column, agent, tokens, start_at, end_at, tags)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
+  insert.run(board.id, title, description || '', column, agent || null, tokens || 0, start_at || null, end_at || null, tags || '');
   const info = db.prepare('SELECT last_insert_rowid() AS id').get();
   const cardId = info.id;
-  insert.run(board.id, title, description || '', column, agent || null, tokens || 0, start_at || null, end_at || null, tags || '');
   const card = db.prepare('SELECT * FROM cards WHERE id = ?').get(cardId);
   res.json(card);
 });
@@ -138,12 +137,13 @@ app.post('/api/kanban/board/:slug/cards', (req, res) => {
 app.patch('/api/kanban/card/:id', (req, res) => {
   const { column, agent, tokens, end_at, tags } = req.body;
   const update = db.prepare(`
-    UPDATE cards SET column = COALESCE(?, column),
-                    agent = COALESCE(?, agent),
-                    tokens = COALESCE(?, tokens),
-                    end_at = COALESCE(?, end_at),
-                    tags = COALESCE(?, tags),
-                    updated_at = CURRENT_TIMESTAMP
+    UPDATE cards
+    SET column = COALESCE(?, column),
+        agent = COALESCE(?, agent),
+        tokens = COALESCE(?, tokens),
+        end_at = COALESCE(?, end_at),
+        tags = COALESCE(?, tags),
+        updated_at = CURRENT_TIMESTAMP
     WHERE id = ?
   `);
   update.run(column, agent, tokens, end_at, tags, req.params.id);
@@ -161,8 +161,8 @@ app.post('/api/kanban/card/:id/comments', (req, res) => {
   const { author, content, source } = req.body;
   if (!author || !content) return res.status(400).json({ error: 'Author and content required' });
   const insert = db.prepare('INSERT INTO comments (card_id, author, content, source) VALUES (?, ?, ?, ?)');
-  const info = db.prepare('SELECT last_insert_rowid() AS id').get();
   insert.run(req.params.id, author, content, source || 'web');
+  const info = db.prepare('SELECT last_insert_rowid() AS id').get();
   res.json({ id: info.id });
 });
 
@@ -199,24 +199,21 @@ function applyEvent(payload) {
         INSERT INTO cards (board_id, title, description, column, agent, tokens, start_at, end_at, tags, created_at, updated_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
-        data.board_id, data.title, data.description || '', data.column, data.agent || null,
-        data.tokens || 0, data.start_at || null, data.end_at || null, data.tags || '',
-        timestamp, timestamp
+        data.board_id, data.title, data.description || '', data.column, data.agent || null, data.tokens || 0,
+        data.start_at || null, data.end_at || null, data.tags || '', timestamp, timestamp
       );
       break;
     case 'card:update':
       db.prepare(`
-        UPDATE cards SET column = COALESCE(?, column),
-                        agent = COALESCE(?, agent),
-                        tokens = COALESCE(?, tokens),
-                        end_at = COALESCE(?, end_at),
-                        tags = COALESCE(?, tags),
-                        updated_at = ?
+        UPDATE cards
+        SET column = COALESCE(?, column),
+            agent = COALESCE(?, agent),
+            tokens = COALESCE(?, tokens),
+            end_at = COALESCE(?, end_at),
+            tags = COALESCE(?, tags),
+            updated_at = ?
         WHERE id = ?
-      `).run(
-        data.column, data.agent, data.tokens, data.end_at, data.tags,
-        timestamp, data.id
-      );
+      `).run(data.column, data.agent, data.tokens, data.end_at, data.tags, timestamp, data.id);
       break;
     case 'card:comment':
       db.prepare('INSERT INTO comments (card_id, author, content, source, created_at) VALUES (?, ?, ?, ?, ?)')
